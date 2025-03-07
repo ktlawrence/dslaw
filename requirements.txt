@@ -1,5 +1,4 @@
-flask
-flask-cors
-gunicorn
-python-dotenv
-openai
+streamlit>=1.0.0
+openai>=0.27.0
+python-dotenv>=1.0.0
+
