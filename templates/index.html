@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek Chat</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #f4f4f4; 
+        }
+        #chat-container {
+            width: 80%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #chatbox { 
+            width: 100%;
+            height: 400px; /* Increased height */
+            border: 1px solid #ccc; 
+            padding: 10px; 
+            overflow-y: auto; 
+            background-color: #fff;
+            text-align: left;
+            font-size: 18px; /* Bigger text */
+        }
+        .message { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border-radius: 5px;
+        }
+        .user { 
+            text-align: right; 
+            font-weight: bold; 
+            background-color: #d1ecf1;
+        }
+        .assistant {
+            background-color: #f8d7da;
+        }
+        #user_input {
+            width: 95%;
+            height: 60px; /* Bigger input box */
+            font-size: 18px;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h2>DeepSeek Chat</h2>
+        <div id="chatbox"></div>
+        <textarea id="user_input" placeholder="Type your message here..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            let input = document.getElementById("user_input");
+            let chatbox = document.getElementById("chatbox");
+
+            if (!input.value.trim()) return;
+
+            let userMessage = document.createElement("div");
+            userMessage.className = "message user";
+            userMessage.textContent = "You: " + input.value;
+            chatbox.appendChild(userMessage);
+
+            let botMessage = document.createElement("div");
+            botMessage.className = "message assistant";
+            chatbox.appendChild(botMessage);
+
+            let response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: input.value })
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            botMessage.textContent = "Bot: ";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                botMessage.textContent += decoder.decode(value);
+                chatbox.scrollTop = chatbox.scrollHeight; // Auto-scroll
+            }
+
+            input.value = "";
+        }
+    </script>
+</body>
+</html>
